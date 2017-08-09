@@ -69,8 +69,10 @@
 
 #ifdef TR1
 #define STDPRE std::tr1
+#define ABS abs
 #else
 #define STDPRE std
+#define ABS std::abs
 #endif
 
 #include <string.h>
@@ -109,7 +111,7 @@ public:
     float time1;
     float time2;
     static bool higher (ChemRecord c1, ChemRecord c2) 
-	{return c1.time1 > c2.time1;}
+    {return c1.time1 > c2.time1;}
     int nfields () {return fields.size();}
 };
 
@@ -125,11 +127,11 @@ std::vector<STDPRE::unordered_map<std::string,std::vector<ChemRecord> > >AllFile
 class OutputRecord {
 public:
     OutputRecord (std::string inputline, float intime1)
-	{line=inputline;time1=intime1;}
+    {line=inputline;time1=intime1;}
     std::string line;
     float time1;
     static bool lower (OutputRecord r1, OutputRecord r2)
-	{return r1.time1 < r2.time1;}
+    {return r1.time1 < r2.time1;}
 };
 
 std::vector<OutputRecord> OutputLines;
@@ -149,73 +151,73 @@ int main (int argc, char** argv)
     outfile.open("aligncsv.csv");
     if (outfile.fail())
     {
-	std::cerr << "Unable to open output file\n";
-	return -10;
+      std::cerr << "Unable to open output file\n";
+      return -10;
     }
 
 // parse arguments and open files
 
     if (argc < 2) {
-	std::cout << "Usage: aligncsv [-1] [-d <diff>] [<filename>]+\n";
-	std::cout << "-1 means force two headers to one\n";
-	std::cout << "-d <diff> sets maximum alignment difference, default is .01 for 1%\n";
-	std::cout << "   >1 will set integer difference, 0 means must be exactly same\n";
-	return 0;
+      std::cout << "Usage: aligncsv [-1] [-d <diff>] [<filename>]+\n";
+      std::cout << "-1 means force two headers to one\n";
+      std::cout << "-d <diff> sets maximum alignment difference, default is .01 for 1%\n";
+      std::cout << "   >1 will set integer difference, 0 means must be exactly same\n";
+      return 0;
     }
 
     int iarg = 1;
     int single_header = 0;
     if (!strcmp(argv[iarg],"-1")) {
-//	std::cout << "single header override\n";
-	single_header = 1;
-	iarg++;
+//    std::cout << "single header override\n";
+      single_header = 1;
+      iarg++;
     }
     if (!strcmp(argv[iarg],"-d")) {
-	iarg++;
-	if (argc < 3) {
-	    std::cerr << "-d requires <diff> specification\n";
-	    return -1;
-	}
-	char* ppend;
-	adiff = strtof (argv[iarg],&ppend);
-	if (adiff < 0 || *ppend != 0) {
-	    std::cerr << "<diff> specification must be >= 0\n";
-	    return -1;
-	}
-	if (adiff >= 1) {
-	    afraction = false;
-	}
-	iarg++;
+    iarg++;
+    if (argc < 3) {
+        std::cerr << "-d requires <diff> specification\n";
+        return -1;
+    }
+    char* ppend;
+    adiff = strtof (argv[iarg],&ppend);
+    if (adiff < 0 || *ppend != 0) {
+        std::cerr << "<diff> specification must be >= 0\n";
+        return -1;
+    }
+    if (adiff >= 1) {
+        afraction = false;
+    }
+    iarg++;
     }
     if (!strcmp(argv[iarg],"-m")) {
-	LineTerminator = MICROSOFT_TERMINATOR;
-	iarg++;
+    LineTerminator = MICROSOFT_TERMINATOR;
+    iarg++;
     }
 
     int first_file_index = iarg;
 
     for (; iarg < argc; iarg++)
     {
-	if (ninfiles >= MAXFILES)
-	{
-	    std::cerr << "Maximum " << MAXFILES <<
-		" number of files exceeded";
-	    return -1;
-	}
-	int ifile = iarg - first_file_index;
-	infile[ifile].open (argv[iarg]);
-	if (infile[ifile].fail())
-	{
-	    std::cerr << "No Such File: " << argv[iarg] << "\n";
-	    return -1;
-	}
-	if (!infile[ifile].is_open()) {
-	    std::cerr << "File " << argv[iarg] << " was not opened\n";
-	    return -1;
-	}
-	ninfiles++;
-	Filenames.push_back(argv[iarg]);
-	DataColumns.push_back(0);
+    if (ninfiles >= MAXFILES)
+    {
+        std::cerr << "Maximum " << MAXFILES <<
+        " number of files exceeded";
+        return -1;
+    }
+    int ifile = iarg - first_file_index;
+    infile[ifile].open (argv[iarg]);
+    if (infile[ifile].fail())
+    {
+        std::cerr << "No Such File: " << argv[iarg] << "\n";
+        return -1;
+    }
+    if (!infile[ifile].is_open()) {
+        std::cerr << "File " << argv[iarg] << " was not opened\n";
+        return -1;
+    }
+    ninfiles++;
+    Filenames.push_back(argv[iarg]);
+    DataColumns.push_back(0);
     }
 
 // Read In Files
@@ -230,12 +232,12 @@ int main (int argc, char** argv)
     std::vector<std::vector<std::string> > Lines_in_file;
     for (int ifile = 0; ifile < ninfiles; ifile++)
     {
-	FileData.clear();
-	std::vector<std::string> header1;
-	std::vector<std::string> header2;
-	header2_required = false;
+    FileData.clear();
+    std::vector<std::string> header1;
+    std::vector<std::string> header2;
+    header2_required = false;
 
-	std::cout << "\nReading file " << Filenames[ifile] << "\n";
+    std::cout << "\nReading file " << Filenames[ifile] << "\n";
 
 // Current design permits (but does not require) two headers
 //   First header is incomplete if there are nulls so second is then read
@@ -251,133 +253,133 @@ int main (int argc, char** argv)
 
 //   read first header
 
-	getline (infile[ifile], aline);
-//	std::cout << "Got line1: " << aline << "\n";
+    getline (infile[ifile], aline);
+//    std::cout << "Got line1: " << aline << "\n";
 
-	std::stringstream sstream1(aline);
-	count_empties = 0;
-	bool last_field_empty = false;
-	bool last_empty_field_counted = false;
-	while(std::getline (sstream1, field, ',') )
-	{
-	    last_field_empty = false;
-	    last_empty_field_counted = false;
-//	    printf ("Got name: %s\n",field.c_str());
-	    if (field.empty())
-	    {
-		count_empties++;
-		field = last_field;
-		last_field_empty = true;
-		last_empty_field_counted = true;
-	    } else {
+    std::stringstream sstream1(aline);
+    count_empties = 0;
+    bool last_field_empty = false;
+    bool last_empty_field_counted = false;
+    while(std::getline (sstream1, field, ',') )
+    {
+        last_field_empty = false;
+        last_empty_field_counted = false;
+//        printf ("Got name: %s\n",field.c_str());
+        if (field.empty())
+        {
+        count_empties++;
+        field = last_field;
+        last_field_empty = true;
+        last_empty_field_counted = true;
+        } else {
 // handle non-standard line terminators as uncounted empty
-		bool empty_field = false;
-		int flen = field.length();
-		if (flen < 3) {
-		    empty_field = true;
-		    for (int fin = 0; fin < flen; fin++)
-		    {
-			if (!std::isspace(field[fin]))
-			{
-			    empty_field = false;
-			}
-		    }
-		    if (empty_field)
-		    {
-//			std::cout << "...virtually empty\n";
-			field = last_field;
-			last_field_empty = true;
-		    }
-		}
-	    }
-	    header1.push_back (field);
-	}
+        bool empty_field = false;
+        int flen = field.length();
+        if (flen < 3) {
+            empty_field = true;
+            for (int fin = 0; fin < flen; fin++)
+            {
+            if (!std::isspace(field[fin]))
+            {
+                empty_field = false;
+            }
+            }
+            if (empty_field)
+            {
+//            std::cout << "...virtually empty\n";
+            field = last_field;
+            last_field_empty = true;
+            }
+        }
+        }
+        header1.push_back (field);
+    }
 
-	if (last_field_empty)
-	{
-//	    std::cout << "last field empty so popping\n";
-	    header1.pop_back();
-	}
-	if (last_empty_field_counted)
-	{
-	    count_empties--;
-	}
+    if (last_field_empty)
+    {
+//        std::cout << "last field empty so popping\n";
+        header1.pop_back();
+    }
+    if (last_empty_field_counted)
+    {
+        count_empties--;
+    }
 
-	if (count_empties)
-	{
-	    header2_required = true;
-	}
+    if (count_empties)
+    {
+        header2_required = true;
+    }
 
 //   read second header if required
 
-	if (header2_required)
-	{
-	    count_empties = 0;
-	    getline (infile[ifile], aline);
-//	    printf ("Got line2: %s\n",aline.c_str());
-	    std::stringstream sstream2(aline);
-	    last_field_empty = false;
-	    last_empty_field_counted = false;
-	    while(std::getline (sstream2, field, ',') )
-	    {
-		last_field_empty = false;
-		last_empty_field_counted = false;
-//		printf ("Got name: %s\n",field.c_str());
-		if (field.empty())
-		{
-//		    std::cerr << "empty field in second header, file " <<
-//			Filenames[ifile];
-		    count_empties++;
-		    last_field_empty = true;
-		    last_empty_field_counted = true;
-		} else {
+    if (header2_required)
+    {
+        count_empties = 0;
+        getline (infile[ifile], aline);
+//        printf ("Got line2: %s\n",aline.c_str());
+        std::stringstream sstream2(aline);
+        last_field_empty = false;
+        last_empty_field_counted = false;
+        while(std::getline (sstream2, field, ',') )
+        {
+        last_field_empty = false;
+        last_empty_field_counted = false;
+//        printf ("Got name: %s\n",field.c_str());
+        if (field.empty())
+        {
+//            std::cerr << "empty field in second header, file " <<
+//            Filenames[ifile];
+            count_empties++;
+            last_field_empty = true;
+            last_empty_field_counted = true;
+        } else {
 // handle non-standard line terminators as uncounted empty
-		    bool empty_field = false;
-		    int flen = field.length();
-		    if (flen < 3) {
-			empty_field = true;
-			for (int fin = 0; fin < flen; fin++)
-			{
-			    if (!std::isspace(field[fin]))
-			    {
-				empty_field = false;
-			    }
-			}
-			if (empty_field)
-			{
-//			    std::cout << "...virtually empty\n";
-			    field = last_field;
-			    last_field_empty = true;
-			}
-		    }
-		}
-		header2.push_back (field);
-	    }
-	    if (last_field_empty)
-	    {
-//		std::cout << "last field empty so popping\n";
-		header2.pop_back();
-	    }
-	    if (last_empty_field_counted)
-	    {
-		count_empties--;
-	    }
-	    if (count_empties)
-	    {
-		std::cerr << "Second header has incomplete fields in file: "
-			  << Filenames[ifile] << "\n";
-		return -2;
-	    }
-	    if (header2.size() != header1.size())
-	    {
-		std::cerr << "First and second headers different size\n";
-		return -3;
-	    }
-	    record_size = header2.size();
-	    std::cout << "Two headers read successfully.\n";
-	} else {
-	    std::cout << "One header read successfully.\n";
-	}
+            bool empty_field = false;
+            int flen = field.length();
+            if (flen < 3) {
+            empty_field = true;
+            for (int fin = 0; fin < flen; fin++)
+            {
+                if (!std::isspace(field[fin]))
+                {
+                empty_field = false;
+                }
+            }
+            if (empty_field)
+            {
+//                std::cout << "...virtually empty\n";
+                field = last_field;
+                last_field_empty = true;
+            }
+            }
+        }
+        header2.push_back (field);
+        }
+        if (last_field_empty)
+        {
+//        std::cout << "last field empty so popping\n";
+        header2.pop_back();
+        }
+        if (last_empty_field_counted)
+        {
+        count_empties--;
+        }
+        if (count_empties)
+        {
+        std::cerr << "Second header has incomplete fields in file: "
+              << Filenames[ifile] << "\n";
+        return -2;
+        }
+        if (header2.size() != header1.size())
+        {
+        std::cerr << "First and second headers different size\n";
+        return -3;
+        }
+        record_size = header2.size();
+        std::cout << "Two headers read successfully.\n";
+    } else {
+        std::cout << "One header read successfully.\n";
+    }
 
 // Create composite field names from both headers
 // Second header line becomes "suffix" (e.g. "@subject-1")
@@ -385,60 +387,60 @@ int main (int argc, char** argv)
 // If quotes are present in either name, they apply to both but are removed
 //   in between.
 
-	std::vector<std::string> fields;
-	if (!header2_required)
-	{
-	    fields = header1;
-	}
-	else
-	{
-	    std::string last_suffix = "";
-	    for (int ich = 0; ich < record_size; ich++)
-	    {
-		bool quote_prefix = false;
-		bool quote_suffix = false; 
-		std::string composite = header2[ich];
-		if ('"' == composite[composite.length()-1]) {
-		    composite.erase(composite.length()-1);
-		    quote_prefix = true;
-		}
+    std::vector<std::string> fields;
+    if (!header2_required)
+    {
+        fields = header1;
+    }
+    else
+    {
+        std::string last_suffix = "";
+        for (int ich = 0; ich < record_size; ich++)
+        {
+        bool quote_prefix = false;
+        bool quote_suffix = false; 
+        std::string composite = header2[ich];
+        if ('"' == composite[composite.length()-1]) {
+            composite.erase(composite.length()-1);
+            quote_prefix = true;
+        }
 
-		std::string suffix = header1[ich];
-		if (suffix.length() > 0) {
-		    last_suffix = suffix;
-		} else {
-		    if (last_suffix.length() > 0) {
-			suffix = last_suffix;
-		    } else {
-			suffix = "";
-		    }
-		}
-		if (suffix[0] == '"' ) {
-		    if (single_header) {
-			suffix.erase(0,1);
-		    }
-		    quote_suffix = true;
-		}
-		if (suffix.length() > 0) {
-		    composite += HEADER_SEPARATOR;
-		    composite += suffix;
-		}
-		if (quote_prefix && composite[composite.length()-1] != '"') {
-		    composite += "\"";
-		}
-		if (quote_suffix && !quote_prefix) {
-		    composite = "\"" + composite;
-		}
-		fields.push_back (composite);
-		Header.push_back (composite);
-		if (ifile==0 || ich > 0) {
-		    Header1.push_back (suffix);
-		    Header2.push_back (header2[ich]);
-		}
-		DataColumns[ifile]++;
-	    }
-	}
-	DataColumns[ifile]--;  // Remove peak column
+        std::string suffix = header1[ich];
+        if (suffix.length() > 0) {
+            last_suffix = suffix;
+        } else {
+            if (last_suffix.length() > 0) {
+            suffix = last_suffix;
+            } else {
+            suffix = "";
+            }
+        }
+        if (suffix[0] == '"' ) {
+            if (single_header) {
+            suffix.erase(0,1);
+            }
+            quote_suffix = true;
+        }
+        if (suffix.length() > 0) {
+            composite += HEADER_SEPARATOR;
+            composite += suffix;
+        }
+        if (quote_prefix && composite[composite.length()-1] != '"') {
+            composite += "\"";
+        }
+        if (quote_suffix && !quote_prefix) {
+            composite = "\"" + composite;
+        }
+        fields.push_back (composite);
+        Header.push_back (composite);
+        if (ifile==0 || ich > 0) {
+            Header1.push_back (suffix);
+            Header2.push_back (header2[ich]);
+        }
+        DataColumns[ifile]++;
+        }
+    }
+    DataColumns[ifile]--;  // Remove peak column
 
 
 // ORIGINAL VERSION did this:
@@ -485,119 +487,119 @@ int main (int argc, char** argv)
 //    and record index number
 //
 
-	std::vector<std::string>* Fields;
+    std::vector<std::string>* Fields;
 
-	while (getline(infile[ifile], aline))
-	{
-//	    std::cout << "Got line " << aline << "\n";
+    while (getline(infile[ifile], aline))
+    {
+//        std::cout << "Got line " << aline << "\n";
 
 // requires explicit parsing because there may be quoted fields
 //   first, get first field, chemicalName
 
-	    std::vector<std::string> Fields;
+        std::vector<std::string> Fields;
 
-	    int column = 0;
-	    std::string chemicalName;
+        int column = 0;
+        std::string chemicalName;
 
-	    std::string::iterator it = aline.begin();
-	    bool finis = false;
-	    unsigned quotes = 0;
-	    char prev = 0;
-	    while ( !finis && it != aline.end() )
-	    {
-		switch (*it) {
-		case '"':
-		    ++quotes;
-		    break;
-		case ',':
-		    if (quotes == 0 || (prev == '"' && (quotes & 1) == 0)) {
-			finis = true;
-		    }
-		    break;
-		default:;
-		}
-		if (!finis) {
-		    chemicalName += prev = *it;
-		}
-		it++;
-	    }
-	    Chemicals.insert (chemicalName);
+        std::string::iterator it = aline.begin();
+        bool finis = false;
+        unsigned quotes = 0;
+        char prev = 0;
+        while ( !finis && it != aline.end() )
+        {
+        switch (*it) {
+        case '"':
+            ++quotes;
+            break;
+        case ',':
+            if (quotes == 0 || (prev == '"' && (quotes & 1) == 0)) {
+            finis = true;
+            }
+            break;
+        default:;
+        }
+        if (!finis) {
+            chemicalName += prev = *it;
+        }
+        it++;
+        }
+        Chemicals.insert (chemicalName);
 
 //   next, get each field and add to table for this chemicalName and column
 
-	    std::string field;
-	    std::string key;
-	    while (1) {
-		finis = false;
-		quotes = 0;
-		field = "";
-		while ( !finis && it != aline.end() )
-		{
-		    bool cr = false;
-		    switch (*it) {
-		    case '"':
-			++quotes;
-			break;
-		    case ',':
-			if (quotes == 0 || (prev == '"' && (quotes & 1)==0)) {
-			    finis = true;
-			}
-			break;
-		    case '\r':
-			cr = true;
-			break;
-		    default:;
-		    }
-		    if (!finis && !cr) {
-			field += prev = *it;
-		    }
-		    it++;
-		}
-		Fields.push_back(field);
-		column++;
-		if (it == aline.end() ) {
-		    break;
-		}
-	    }
-	    ChemRecord chemrecord;
-	    chemrecord.fields = Fields;
-	    float stime = 0;
+        std::string field;
+        std::string key;
+        while (1) {
+        finis = false;
+        quotes = 0;
+        field = "";
+        while ( !finis && it != aline.end() )
+        {
+            bool cr = false;
+            switch (*it) {
+            case '"':
+            ++quotes;
+            break;
+            case ',':
+            if (quotes == 0 || (prev == '"' && (quotes & 1)==0)) {
+                finis = true;
+            }
+            break;
+            case '\r':
+            cr = true;
+            break;
+            default:;
+            }
+            if (!finis && !cr) {
+            field += prev = *it;
+            }
+            it++;
+        }
+        Fields.push_back(field);
+        column++;
+        if (it == aline.end() ) {
+            break;
+        }
+        }
+        ChemRecord chemrecord;
+        chemrecord.fields = Fields;
+        float stime = 0;
 
 // stof not supported in gcc 4.4.7
-//	    std::string::size_type sz;
-//	    stime = std::stof (Fields[1], &sz);
+//        std::string::size_type sz;
+//        stime = std::stof (Fields[1], &sz);
 
 // instead using strtof, and skip past quotes if used
-	    const int bufsiz = 128;
-	    char pstring[bufsiz];
-	    strncpy (pstring,Fields[1].c_str(),bufsiz);
-	    char* ppstring;
-	    if (pstring[0] == '"') {
-		ppstring = &pstring[1];
-	    } else {
-		ppstring = &pstring[0];
-	    }
-	    char* ppend;
-	    stime = strtof (ppstring, &ppend);
-	    if (stime==0 || (*ppend != '\0' && *ppend != '"')) {
-		std::cerr << "error reading time value: " << Fields[1] << "\n";
-		return -1;
-	    }
-	    chemrecord.time1 = stime;
-	    if (FileData.count(chemicalName)) {
-		FileData[chemicalName].push_back(chemrecord);
-	    } else {
-		std::vector<ChemRecord> crecords;
-		crecords.push_back(chemrecord);
-		FileData[chemicalName] = crecords;
-	    }
-	    
-	}
-	if (infile[ifile].bad()) {
-	    std::cerr << "error reading file\n";
-	    return -1;
-	}
-	AllFileData.push_back(FileData);
+        const int bufsiz = 128;
+        char pstring[bufsiz];
+        strncpy (pstring,Fields[1].c_str(),bufsiz);
+        char* ppstring;
+        if (pstring[0] == '"') {
+        ppstring = &pstring[1];
+        } else {
+        ppstring = &pstring[0];
+        }
+        char* ppend;
+        stime = strtof (ppstring, &ppend);
+        if (stime==0 || (*ppend != '\0' && *ppend != '"')) {
+        std::cerr << "error reading time value: " << Fields[1] << "\n";
+        return -1;
+        }
+        chemrecord.time1 = stime;
+        if (FileData.count(chemicalName)) {
+        FileData[chemicalName].push_back(chemrecord);
+        } else {
+        std::vector<ChemRecord> crecords;
+        crecords.push_back(chemrecord);
+        FileData[chemicalName] = crecords;
+        }
+        
+    }
+    if (infile[ifile].bad()) {
+        std::cerr << "error reading file\n";
+        return -1;
+    }
+    AllFileData.push_back(FileData);
     } // End reading all files
     std::cout << "Finished reading all files\n";
 
@@ -605,36 +607,36 @@ int main (int argc, char** argv)
 // write the output headers
 
     if (single_header || !header2_required) {
-	for (int ifield = 0; ifield < Header1.size(); ifield++)
-	{
-	    if (ifield > 0) {
-		outfile << ",";
-	    }
-	    outfile << Header[ifield];
-	}
-	outfile << LineTerminator;
+    for (int ifield = 0; ifield < Header1.size(); ifield++)
+    {
+        if (ifield > 0) {
+        outfile << ",";
+        }
+        outfile << Header[ifield];
+    }
+    outfile << LineTerminator;
     } else {
-	std::string lastfield = "";
-	for (int ifield = 0; ifield < Header1.size(); ifield++) {
-	    if (ifield > 0) {
-		outfile << ",";
-	    }
-	    if (Header1[ifield] != lastfield) {
-		outfile << Header1[ifield];
-	    }
-	    lastfield = Header1[ifield];
-	}
-	outfile << LineTerminator;
-	if (header2_required)
-	{
-	    for (int ifield = 0; ifield < Header2.size(); ifield++) {
-		if (ifield > 0) {
-		    outfile << ",";
-		}
-		outfile << Header2[ifield];
-	    }
-	    outfile << LineTerminator;
-	}
+    std::string lastfield = "";
+    for (int ifield = 0; ifield < Header1.size(); ifield++) {
+        if (ifield > 0) {
+        outfile << ",";
+        }
+        if (Header1[ifield] != lastfield) {
+        outfile << Header1[ifield];
+        }
+        lastfield = Header1[ifield];
+    }
+    outfile << LineTerminator;
+    if (header2_required)
+    {
+        for (int ifield = 0; ifield < Header2.size(); ifield++) {
+        if (ifield > 0) {
+            outfile << ",";
+        }
+        outfile << Header2[ifield];
+        }
+        outfile << LineTerminator;
+    }
     }
 
 //              WRITE OUTPUT DATA
@@ -644,127 +646,127 @@ int main (int argc, char** argv)
      int records_written = 0;
      std::cout << "Number of chemicals found: " << Chemicals.size() << "\n";
      for (std::set<std::string>::iterator 
-	      it = Chemicals.begin(); it != Chemicals.end(); ++it)
+          it = Chemicals.begin(); it != Chemicals.end(); ++it)
      {
-	 std::string keychem = *it;
-	 bool more_data_seen = true;
-	 while (more_data_seen) {
-	     std::string outline = keychem;
-	     
+     std::string keychem = *it;
+     bool more_data_seen = true;
+     while (more_data_seen) {
+         std::string outline = keychem;
+         
 // Obtain first and second lowest retention time records from all files
 
-	     std::vector<ChemRecord> lowest_recs;
-	     float lowest_time1 = 0;
-	     float second_lowest_time1 = 0;
+         std::vector<ChemRecord> lowest_recs;
+         float lowest_time1 = 0;
+         float second_lowest_time1 = 0;
 
-	     int ifile;
-	     more_data_seen = false;
-	     for (ifile = 0; ifile < ninfiles; ifile++)
-	     {
-		 if (AllFileData[ifile].count(keychem) && 
-		     AllFileData[ifile][keychem].size()) {
+         int ifile;
+         more_data_seen = false;
+         for (ifile = 0; ifile < ninfiles; ifile++)
+         {
+         if (AllFileData[ifile].count(keychem) && 
+             AllFileData[ifile][keychem].size()) {
 // sort in place (lowest to back)
-		     std::sort (AllFileData[ifile][keychem].begin(),
-				AllFileData[ifile][keychem].end(),
-				ChemRecord::higher);
+             std::sort (AllFileData[ifile][keychem].begin(),
+                AllFileData[ifile][keychem].end(),
+                ChemRecord::higher);
 
 // pop the lowest
-		     ChemRecord lowest  = AllFileData[ifile][keychem].back();
-		     AllFileData[ifile][keychem].pop_back();
-		     if (lowest_time1 == 0 ||
-			 lowest_time1 > lowest.time1) {
-			 lowest_time1 = lowest.time1;
-		     }
-		     lowest_recs.push_back(lowest);
+             ChemRecord lowest  = AllFileData[ifile][keychem].back();
+             AllFileData[ifile][keychem].pop_back();
+             if (lowest_time1 == 0 ||
+             lowest_time1 > lowest.time1) {
+             lowest_time1 = lowest.time1;
+             }
+             lowest_recs.push_back(lowest);
 
 // check the second lowest for time only (don't pop)
 
-		     if (AllFileData[ifile][keychem].begin() ==
-			 AllFileData[ifile][keychem].end() ) {
-		     } else {
-			 more_data_seen = true;
-			 float test_lowest_time1 = 
-			     AllFileData[ifile][keychem].back().time1;
-			 if (second_lowest_time1 == 0 ||
-			     second_lowest_time1 > test_lowest_time1) {
-			     second_lowest_time1 = test_lowest_time1;
-			 }
-		     }
-		 } else {
-		     lowest_recs.push_back(NA);
-		 }
-	     }
+             if (AllFileData[ifile][keychem].begin() ==
+             AllFileData[ifile][keychem].end() ) {
+             } else {
+             more_data_seen = true;
+             float test_lowest_time1 = 
+                 AllFileData[ifile][keychem].back().time1;
+             if (second_lowest_time1 == 0 ||
+                 second_lowest_time1 > test_lowest_time1) {
+                 second_lowest_time1 = test_lowest_time1;
+             }
+             }
+         } else {
+             lowest_recs.push_back(NA);
+         }
+         }
 
 // Now, for each record in our lowest_recs set
 //    See if it is higher that adiff above the lowest
 //    See if it is closer to the second_lowest than lowest
 //      If either condition applies, push it back
 
-//	     std::cout << "aligning\n";
-	     for (ifile = 0; ifile < ninfiles; ifile++)
-	     {
-		 ChemRecord test_record = lowest_recs[ifile];
-		 float cutoff;
-		 if (afraction) {
-		     cutoff = (1 + adiff) * lowest_time1;
-		 } else {
-		     cutoff = lowest_time1 + adiff;
-		 }
-		 bool pushback = false;
-		 if (test_record.nfields() != 0) {
-		     if (test_record.time1 > cutoff) {
-			 pushback = true;
-		     } else if (test_record.time1 - lowest_time1 > 
-				abs(second_lowest_time1 - test_record.time1))
-		     {
-			 pushback = true;
-		     }
-		     if (pushback) {
-//			 std::cout << "doing pushback on record with time " <<
-//			     test_record.time1 << "\n";
-			 more_data_seen = true;
-			 AllFileData[ifile][keychem].push_back(test_record);
-			 lowest_recs[ifile] = NA;
-		     }
-		 }
-	     }
+//         std::cout << "aligning\n";
+         for (ifile = 0; ifile < ninfiles; ifile++)
+         {
+         ChemRecord test_record = lowest_recs[ifile];
+         float cutoff;
+         if (afraction) {
+             cutoff = (1 + adiff) * lowest_time1;
+         } else {
+             cutoff = lowest_time1 + adiff;
+         }
+         bool pushback = false;
+         if (test_record.nfields() != 0) {
+             if (test_record.time1 > cutoff) {
+             pushback = true;
+             } else if (test_record.time1 - lowest_time1 > 
+                ABS(second_lowest_time1 - test_record.time1))
+             {
+             pushback = true;
+             }
+             if (pushback) {
+//             std::cout << "doing pushback on record with time " <<
+//                 test_record.time1 << "\n";
+             more_data_seen = true;
+             AllFileData[ifile][keychem].push_back(test_record);
+             lowest_recs[ifile] = NA;
+             }
+         }
+         }
 
 // Accumulate all the lowest records that haven't been pushed back
 // Write out blanks for records that don't exist or have been pushed back
 
-//	     std::cout << "Accumulating\n";
-	     for (ifile=0; ifile < ninfiles; ifile++)
-	     {
-		 bool first_skipped = false;
-		 if (lowest_recs[ifile].nfields()) {
-		     std::vector<std::string>::iterator field = 
-			 lowest_recs[ifile].fields.begin();
-		     std::string last_field;
-		     int column = 0;
-		     for (; field != lowest_recs[ifile].fields.end();field++)
-		     {
+//         std::cout << "Accumulating\n";
+         for (ifile=0; ifile < ninfiles; ifile++)
+         {
+         bool first_skipped = false;
+         if (lowest_recs[ifile].nfields()) {
+             std::vector<std::string>::iterator field = 
+             lowest_recs[ifile].fields.begin();
+             std::string last_field;
+             int column = 0;
+             for (; field != lowest_recs[ifile].fields.end();field++)
+             {
 // data records may have extra terminating comma (microsoft nonstandard csv)
 // only fields with names are valid
-			 if (++column > DataColumns[ifile]) {
-			     break;
-			 }
+             if (++column > DataColumns[ifile]) {
+                 break;
+             }
 
-			 outline += ",";
-			 outline += *field;
-			 last_field = *field;
-		     }
-		 } else {
+             outline += ",";
+             outline += *field;
+             last_field = *field;
+             }
+         } else {
 // output empty fields for this file
-		     int column = 0;
-		     while (++column <= DataColumns[ifile])
-		     {
-			 outline += ",";
-		     }
-		 }
-	     }
-	     outline += LineTerminator;
-	     OutputLines.push_back (OutputRecord(outline,lowest_time1));
-	 }
+             int column = 0;
+             while (++column <= DataColumns[ifile])
+             {
+             outline += ",";
+             }
+         }
+         }
+         outline += LineTerminator;
+         OutputLines.push_back (OutputRecord(outline,lowest_time1));
+     }
      }
 
 // Sort all output records by time1
@@ -776,12 +778,12 @@ int main (int argc, char** argv)
      std::vector<OutputRecord>::iterator it;
      for (it = OutputLines.begin(); it != OutputLines.end(); it++)
      {
-	 outfile << it->line;
-	 records_written++;
+     outfile << it->line;
+     records_written++;
      }
 
      std::cout << "\n" << records_written 
-	       << " records written to aligncsv.csv\n\n";
+           << " records written to aligncsv.csv\n\n";
     return 0;
 }
 
