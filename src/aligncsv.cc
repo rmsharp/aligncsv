@@ -1,5 +1,3 @@
-#include <Rcpp.h>
-
 // Filename: aligncsv.cc
 // Purpose: align multiple csv files produced by Chromatof
 // Author: Charles Peterson, Texas Biomed, August 2017
@@ -65,7 +63,7 @@
 // STDPRE defines the prefix needed to get C++11 functionality
 // TR1 is needed if compiler is pre C++11 (e.g. gcc 4.4.7)
 // Comment this out for C++11 compliant compilers
-// #define TR1 1
+//#define TR1 1
 
 #ifdef TR1
 #define STDPRE std::tr1
@@ -85,12 +83,8 @@
 #include <set>
 #include <cctype>
 #include <algorithm>
-#ifdef TR1
 // tr1 update required for unordered_map
-#include <tr1/unordered_map> // removed to moke C++11 compliant
-#else
 #include <unordered_map>
-#endif
 
 using std::ofstream;
 
@@ -715,7 +709,7 @@ int main (int argc, char** argv)
 		     if (test_record.time1 > cutoff) {
 			 pushback = true;
 		     } else if (test_record.time1 - lowest_time1 > 
-				abs(second_lowest_time1 - test_record.time1))
+				std::abs(second_lowest_time1 - test_record.time1))
 		     {
 			 pushback = true;
 		     }
