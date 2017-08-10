@@ -13,7 +13,7 @@
 //        -m Use "microsoft" excel formatting with trailing comma
 //
 // Output: aligncsv.csv file is written to working directory.
-//  
+//
 // Notes: Input file(s) may have 2 headers, or one header
 //
 // If the first header has blank columns, a second header is required.
@@ -24,7 +24,7 @@
 // Default is to output header(s) in same form as input.
 //
 // Optionally, the two header form can be changed to a one header form
-//   for compatibility with other software by specifying option -1.  
+//   for compatibility with other software by specifying option -1.
 //   In this case, the first header fields become suffixes to the
 //   second header fields, using the HEADER_SEPARATOR defined below as @
 //
@@ -111,7 +111,7 @@ public:
     std::vector<std::string> fields;  // data fields following chemical
     float time1;
     float time2;
-    static bool higher (ChemRecord c1, ChemRecord c2) 
+    static bool higher (ChemRecord c1, ChemRecord c2)
     {return c1.time1 > c2.time1;}
     int nfields () {return fields.size();}
 };
@@ -126,13 +126,13 @@ std::vector<STDPRE::unordered_map<std::string,std::vector<ChemRecord> > >AllFile
 
 // A single output line (including data from all files)
 class OutputRecord {
-    public:
-        OutputRecord (std::string inputline, float intime1)
-        {line=inputline;time1=intime1;}
-        std::string line;
-        float time1;
-        static bool lower (OutputRecord r1, OutputRecord r2)
-        {return r1.time1 < r2.time1;}
+public:
+    OutputRecord (std::string inputline, float intime1)
+    {line=inputline;time1=intime1;}
+    std::string line;
+    float time1;
+    static bool lower (OutputRecord r1, OutputRecord r2)
+    {return r1.time1 < r2.time1;}
 };
 
 std::vector<OutputRecord> OutputLines;
@@ -153,17 +153,17 @@ int main (int argc, char** argv) {
         std::cerr << "Unable to open output file\n";
         return -10;
     }
-
+    
     // parse arguments and open files
-
+    
     if (argc < 2) {
-      std::cout << "Usage: aligncsv [-1] [-d <diff>] [<filename>]+\n";
-      std::cout << "-1 means force two headers to one\n";
-      std::cout << "-d <diff> sets maximum alignment difference, default is .01 for 1%\n";
-      std::cout << "   >1 will set integer difference, 0 means must be exactly same\n";
-      return 0;
+        std::cout << "Usage: aligncsv [-1] [-d <diff>] [<filename>]+\n";
+        std::cout << "-1 means force two headers to one\n";
+        std::cout << "-d <diff> sets maximum alignment difference, default is .01 for 1%\n";
+        std::cout << "   >1 will set integer difference, 0 means must be exactly same\n";
+        return 0;
     }
-
+    
     int iarg = 1;
     int single_header = 0;
     if (!strcmp(argv[iarg],"-1")) {
@@ -192,9 +192,9 @@ int main (int argc, char** argv) {
         LineTerminator = MICROSOFT_TERMINATOR;
         iarg++;
     }
-
+    
     int first_file_index = iarg;
-
+    
     for (; iarg < argc; iarg++) {
         if (ninfiles >= MAXFILES) {
             std::cerr << "Maximum " << MAXFILES <<
@@ -215,25 +215,25 @@ int main (int argc, char** argv) {
         Filenames.push_back(argv[iarg]);
         DataColumns.push_back(0);
     }
-
+    
     // Read In Files
-
+    
     std::string aline;
     std::string field;
     std::string last_field = "";
     int count_empties;
     int record_size;
     bool header2_required;
-
+    
     std::vector<std::vector<std::string> > Lines_in_file;
     for (int ifile = 0; ifile < ninfiles; ifile++) {
         FileData.clear();
         std::vector<std::string> header1;
         std::vector<std::string> header2;
         header2_required = false;
-    
+        
         std::cout << "\nReading file " << Filenames[ifile] << "\n";
-
+        
         // Current design permits (but does not require) two headers
         //   First header is incomplete if there are nulls so second is then read
         //   Composite field names are constructed using both header values with
@@ -247,10 +247,10 @@ int main (int argc, char** argv) {
         //   required (making this more complicated than I would like).
         
         //   read first header
-
+        
         getline (infile[ifile], aline);
         //    std::cout << "Got line1: " << aline << "\n";
-
+        
         std::stringstream sstream1(aline);
         count_empties = 0;
         bool last_field_empty = false;
@@ -284,7 +284,7 @@ int main (int argc, char** argv) {
             }
             header1.push_back (field);
         }
-
+        
         if (last_field_empty) {
             // std::cout << "last field empty so popping\n";
             header1.pop_back();
@@ -295,9 +295,9 @@ int main (int argc, char** argv) {
         if (count_empties) {
             header2_required = true;
         }
-    
+        
         //   read second header if required
-    
+        
         if (header2_required) {
             count_empties = 0;
             getline (infile[ifile], aline);
@@ -323,7 +323,7 @@ int main (int argc, char** argv) {
                         empty_field = true;
                         for (int fin = 0; fin < flen; fin++) {
                             if (!std::isspace(field[fin])) {
-                               empty_field = false;
+                                empty_field = false;
                             }
                         }
                         if (empty_field) {
@@ -344,7 +344,7 @@ int main (int argc, char** argv) {
             }
             if (count_empties) {
                 std::cerr << "Second header has incomplete fields in file: "
-                      << Filenames[ifile] << "\n";
+                << Filenames[ifile] << "\n";
                 return -2;
             }
             if (header2.size() != header1.size()) {
@@ -356,13 +356,13 @@ int main (int argc, char** argv) {
         } else {
             std::cout << "One header read successfully.\n";
         }
-
+        
         // Create composite field names from both headers
         // Second header line becomes "suffix" (e.g. "@subject-1")
         //   If second header field is blank, the preceding non-blank, if any, is used
         // If quotes are present in either name, they apply to both but are removed
         //   in between.
-
+        
         std::vector<std::string> fields;
         if (!header2_required) {
             fields = header1;
@@ -370,13 +370,13 @@ int main (int argc, char** argv) {
             std::string last_suffix = "";
             for (int ich = 0; ich < record_size; ich++) {
                 bool quote_prefix = false;
-                bool quote_suffix = false; 
+                bool quote_suffix = false;
                 std::string composite = header2[ich];
                 if ('"' == composite[composite.length()-1]) {
                     composite.erase(composite.length()-1);
                     quote_prefix = true;
                 }
-        
+                
                 std::string suffix = header1[ich];
                 if (suffix.length() > 0) {
                     last_suffix = suffix;
@@ -412,347 +412,338 @@ int main (int argc, char** argv) {
                 DataColumns[ifile]++;
             }
         }
-    DataColumns[ifile]--;  // Remove peak column
-
-
-    // ORIGINAL VERSION did this:
-    // Read records into hashtable using composite names:
-    //   Each hastable entry is a string (field value) and the key
-    //     is <chemical_name>+<composite-field-name> because
-    //     the chemical name applies to each row and the field name applies to
-    //     the column within each row
-    
-    // REVISION 2 now does this:
-    //   Original design was assuming only one record per chemical.  But
-    //     a chemical may appear in multiple records in one file, and those
-    //     records are distinguished by different values in the first and/or
-    //     second retention time dimensions.  Joining is really understood as
-    //     alighning related records, which have the same chemical AND
-    //     similar first and second weight times.
-    
-    //   The new algorithm saves each LINE of fields by chemical name & sequential
-    //   index number.  Information is saved this way separately for each file.
-    //   and at the same time, a hash of chemical names is also created.
-    //
-    //   For output, we cycle through each chemical name.
-    //     For each file having that chemical, we get the first retention
-    //     time(s) available in records in that file (as an average for each
-    //     applicable record).  Starting from the lowest
-    //     retention time found in all files, we try to find matching lines in
-    //     other files within 10%.  Once we have set of matching lines from all
-    //     possible files, we start from the longest retention time in that
-    //     group, and see if it better matches the next higher retention time(s)
-    //     we would find, and thereby peel away the higher ones that that
-    //     have better matches above, until the current line matches best.
-    //
-    //   The same selection method is applied to the second retention times.
-    //     If the set of records found for second retention times is different,
-    //     a warning message is given.
-    //
-    //  The complete set of matching lines is written to the output file and
-    //     removed from the working set, and the algorithm continues until all
-    //     chemicals have been processed.
-    
-    //  Each field in line of each file is stored as a std::vector of std::string
-    //      (except the first chemical name field)
-    //  That is then stored in a unordered_map using file-index, chemical-name,
-    //    and record index number
-    //
-
-    std::vector<std::string>* Fields;
-
-    while (getline(infile[ifile], aline)) {
-        // std::cout << "Got line " << aline << "\n";
-
-        // requires explicit parsing because there may be quoted fields
-        //   first, get first field, chemicalName
-
-        std::vector<std::string> Fields;
-
-        int column = 0;
-        std::string chemicalName;
-
-        std::string::iterator it = aline.begin();
-        bool finis = false;
-        unsigned quotes = 0;
-        char prev = 0;
-        while (!finis && it != aline.end()) {
-            switch (*it) {
-                case '"':
-                    ++quotes;
-                    break;
-                case ',':
-                    if (quotes == 0 || (prev == '"' && (quotes & 1) == 0)) {
-                    finis = true;
+        DataColumns[ifile]--;  // Remove peak column
+        
+        
+        // ORIGINAL VERSION did this:
+        // Read records into hashtable using composite names:
+        //   Each hastable entry is a string (field value) and the key
+        //     is <chemical_name>+<composite-field-name> because
+        //     the chemical name applies to each row and the field name applies to
+        //     the column within each row
+        
+        // REVISION 2 now does this:
+        //   Original design was assuming only one record per chemical.  But
+        //     a chemical may appear in multiple records in one file, and those
+        //     records are distinguished by different values in the first and/or
+        //     second retention time dimensions.  Joining is really understood as
+        //     alighning related records, which have the same chemical AND
+        //     similar first and second weight times.
+        
+        //   The new algorithm saves each LINE of fields by chemical name & sequential
+        //   index number.  Information is saved this way separately for each file.
+        //   and at the same time, a hash of chemical names is also created.
+        //
+        //   For output, we cycle through each chemical name.
+        //     For each file having that chemical, we get the first retention
+        //     time(s) available in records in that file (as an average for each
+        //     applicable record).  Starting from the lowest
+        //     retention time found in all files, we try to find matching lines in
+        //     other files within 10%.  Once we have set of matching lines from all
+        //     possible files, we start from the longest retention time in that
+        //     group, and see if it better matches the next higher retention time(s)
+        //     we would find, and thereby peel away the higher ones that that
+        //     have better matches above, until the current line matches best.
+        //
+        //   The same selection method is applied to the second retention times.
+        //     If the set of records found for second retention times is different,
+        //     a warning message is given.
+        //
+        //  The complete set of matching lines is written to the output file and
+        //     removed from the working set, and the algorithm continues until all
+        //     chemicals have been processed.
+        
+        //  Each field in line of each file is stored as a std::vector of std::string
+        //      (except the first chemical name field)
+        //  That is then stored in a unordered_map using file-index, chemical-name,
+        //    and record index number
+        //
+        
+        std::vector<std::string>* Fields;
+        
+        while (getline(infile[ifile], aline)) {
+            // std::cout << "Got line " << aline << "\n";
+            
+            // requires explicit parsing because there may be quoted fields
+            //   first, get first field, chemicalName
+            
+            std::vector<std::string> Fields;
+            
+            int column = 0;
+            std::string chemicalName;
+            
+            std::string::iterator it = aline.begin();
+            bool finis = false;
+            unsigned quotes = 0;
+            char prev = 0;
+            while (!finis && it != aline.end()) {
+                switch (*it) {
+                    case '"':
+                        ++quotes;
+                        break;
+                    case ',':
+                        if (quotes == 0 || (prev == '"' && (quotes & 1) == 0)) {
+                            finis = true;
+                        }
+                        break;
+                    default:;
+                }
+                if (!finis) {
+                    chemicalName += prev = *it;
+                }
+                it++;
+            }
+            Chemicals.insert (chemicalName);
+            
+            // next, get each field and add to table for this chemicalName and column
+            
+            std::string field;
+            std::string key;
+            while (1) {
+                finis = false;
+                quotes = 0;
+                field = "";
+                while (!finis && it != aline.end()) {
+                    bool cr = false;
+                    switch (*it) {
+                        case '"':
+                            ++quotes;
+                            break;
+                        case ',':
+                            if (quotes == 0 || (prev == '"' && (quotes & 1)==0)) {
+                                finis = true;
+                            }
+                            break;
+                        case '\r':
+                            cr = true;
+                            break;
+                        default:;
                     }
-                    break;
-                default:;
-            }
-            if (!finis) {
-                chemicalName += prev = *it;
-            }
-            it++;
-        }
-    Chemicals.insert (chemicalName);
-
-    // next, get each field and add to table for this chemicalName and column
-
-    std::string field;
-    std::string key;
-    while (1) {
-        finis = false;
-        quotes = 0;
-        field = "";
-        while (!finis && it != aline.end()) {
-            bool cr = false;
-            switch (*it) {
-                case '"':
-                    ++quotes;
-                    break;
-                case ',':
-                    if (quotes == 0 || (prev == '"' && (quotes & 1)==0)) {
-                        finis = true;
+                    if (!finis && !cr) {
+                        field += prev = *it;
                     }
+                    it++;
+                }
+                Fields.push_back(field);
+                column++;
+                if (it == aline.end()) {
                     break;
-                case '\r':
-                    cr = true;
-                    break;
-                default:;
+                }
             }
-            if (!finis && !cr) {
-                field += prev = *it;
+            ChemRecord chemrecord;
+            chemrecord.fields = Fields;
+            float stime = 0;
+            
+            // stof not supported in gcc 4.4.7
+            //        std::string::size_type sz;
+            //        stime = std::stof (Fields[1], &sz);
+            
+            // instead using strtof, and skip past quotes if used
+            const int bufsiz = 128;
+            char pstring[bufsiz];
+            strncpy (pstring,Fields[1].c_str(),bufsiz);
+            char* ppstring;
+            if (pstring[0] == '"') {
+                ppstring = &pstring[1];
+            } else {
+                ppstring = &pstring[0];
             }
-        it++;
+            char* ppend;
+            stime = strtof (ppstring, &ppend);
+            if (stime==0 || (*ppend != '\0' && *ppend != '"')) {
+                std::cerr << "error reading time value: " << Fields[1] << "\n";
+                return -1;
+            }
+            chemrecord.time1 = stime;
+            if (FileData.count(chemicalName)) {
+                FileData[chemicalName].push_back(chemrecord);
+            } else {
+                std::vector<ChemRecord> crecords;
+                crecords.push_back(chemrecord);
+                FileData[chemicalName] = crecords;
+            }
+            
         }
-        Fields.push_back(field);
-        column++;
-        if (it == aline.end()) {
-            break;
-        }
-    }
-ChemRecord chemrecord;
-chemrecord.fields = Fields;
-float stime = 0;
-
-// stof not supported in gcc 4.4.7
-//        std::string::size_type sz;
-//        stime = std::stof (Fields[1], &sz);
-
-// instead using strtof, and skip past quotes if used
-        const int bufsiz = 128;
-        char pstring[bufsiz];
-        strncpy (pstring,Fields[1].c_str(),bufsiz);
-        char* ppstring;
-        if (pstring[0] == '"') {
-            ppstring = &pstring[1];
-        } else {
-            ppstring = &pstring[0];
-        }
-        char* ppend;
-        stime = strtof (ppstring, &ppend);
-        if (stime==0 || (*ppend != '\0' && *ppend != '"')) {
-            std::cerr << "error reading time value: " << Fields[1] << "\n";
+        if (infile[ifile].bad()) {
+            std::cerr << "error reading file\n";
             return -1;
         }
-        chemrecord.time1 = stime;
-        if (FileData.count(chemicalName)) {
-            FileData[chemicalName].push_back(chemrecord);
-        } else {
-            std::vector<ChemRecord> crecords;
-            crecords.push_back(chemrecord);
-            FileData[chemicalName] = crecords;
-        }
-        
-    }
-    if (infile[ifile].bad()) {
-        std::cerr << "error reading file\n";
-        return -1;
-    }
-AllFileData.push_back(FileData);
-} // End reading all files
-std::cout << "Finished reading all files\n";
-
-
-// write the output headers
-
+        AllFileData.push_back(FileData);
+    } // End reading all files
+    std::cout << "Finished reading all files\n";
+    
+    
+    // write the output headers
+    
     if (single_header || !header2_required) {
-    for (int ifield = 0; ifield < Header1.size(); ifield++)
-    {
-        if (ifield > 0) {
-        outfile << ",";
-        }
-        outfile << Header[ifield];
-    }
-    outfile << LineTerminator;
-    } else {
-    std::string lastfield = "";
-    for (int ifield = 0; ifield < Header1.size(); ifield++) {
-        if (ifield > 0) {
-        outfile << ",";
-        }
-        if (Header1[ifield] != lastfield) {
-        outfile << Header1[ifield];
-        }
-        lastfield = Header1[ifield];
-    }
-    outfile << LineTerminator;
-    if (header2_required)
-    {
-        for (int ifield = 0; ifield < Header2.size(); ifield++) {
-        if (ifield > 0) {
-            outfile << ",";
-        }
-        outfile << Header2[ifield];
+        for (int ifield = 0; ifield < Header1.size(); ifield++) {
+            if (ifield > 0) {
+                outfile << ",";
+            }
+            outfile << Header[ifield];
         }
         outfile << LineTerminator;
+    } else {
+        std::string lastfield = "";
+        for (int ifield = 0; ifield < Header1.size(); ifield++) {
+            if (ifield > 0) {
+                outfile << ",";
+            }
+            if (Header1[ifield] != lastfield) {
+                outfile << Header1[ifield];
+            }
+            lastfield = Header1[ifield];
+        }
+        outfile << LineTerminator;
+        if (header2_required) {
+            for (int ifield = 0; ifield < Header2.size(); ifield++) {
+                if (ifield > 0) {
+                    outfile << ",";
+                }
+                outfile << Header2[ifield];
+            }
+            outfile << LineTerminator;
+        }
     }
+    
+    //              WRITE OUTPUT DATA
+    
+    // iterate through each chemical seen
+    
+    int records_written = 0;
+    std::cout << "Number of chemicals found: " << Chemicals.size() << "\n";
+    for (std::set<std::string>::iterator
+         it = Chemicals.begin(); it != Chemicals.end(); ++it) {
+        std::string keychem = *it;
+        bool more_data_seen = true;
+        while (more_data_seen) {
+            std::string outline = keychem;
+            
+            // Obtain first and second lowest retention time records from all files
+            
+            std::vector<ChemRecord> lowest_recs;
+            float lowest_time1 = 0;
+            float second_lowest_time1 = 0;
+            
+            int ifile;
+            more_data_seen = false;
+            for (ifile = 0; ifile < ninfiles; ifile++) {
+                if (AllFileData[ifile].count(keychem) &&
+                    AllFileData[ifile][keychem].size()) {
+                    // sort in place (lowest to back)
+                    std::sort (AllFileData[ifile][keychem].begin(),
+                               AllFileData[ifile][keychem].end(),
+                               ChemRecord::higher);
+                    
+                    // pop the lowest
+                    ChemRecord lowest  = AllFileData[ifile][keychem].back();
+                    AllFileData[ifile][keychem].pop_back();
+                    if (lowest_time1 == 0 ||
+                        lowest_time1 > lowest.time1) {
+                        lowest_time1 = lowest.time1;
+                    }
+                    lowest_recs.push_back(lowest);
+                    
+                    // check the second lowest for time only (don't pop)
+                    
+                    if (AllFileData[ifile][keychem].begin() ==
+                        AllFileData[ifile][keychem].end()) {
+                    } else {
+                        more_data_seen = true;
+                        float test_lowest_time1 =
+                        AllFileData[ifile][keychem].back().time1;
+                        if (second_lowest_time1 == 0 ||
+                            second_lowest_time1 > test_lowest_time1) {
+                            second_lowest_time1 = test_lowest_time1;
+                        }
+                    }
+                } else {
+                    lowest_recs.push_back(NA);
+                }
+            }
+            
+            // Now, for each record in our lowest_recs set
+            //    See if it is higher that adiff above the lowest
+            //    See if it is closer to the second_lowest than lowest
+            //      If either condition applies, push it back
+            
+            //         std::cout << "aligning\n";
+            for (ifile = 0; ifile < ninfiles; ifile++) {
+                ChemRecord test_record = lowest_recs[ifile];
+                float cutoff;
+                if (afraction) {
+                    cutoff = (1 + adiff) * lowest_time1;
+                } else {
+                    cutoff = lowest_time1 + adiff;
+                }
+                bool pushback = false;
+                if (test_record.nfields() != 0) {
+                    if (test_record.time1 > cutoff) {
+                        pushback = true;
+                    } else if (test_record.time1 - lowest_time1 >
+                               ABS(second_lowest_time1 - test_record.time1))
+                    {
+                        pushback = true;
+                    }
+                    if (pushback) {
+                        //             std::cout << "doing pushback on record with time " <<
+                        //                 test_record.time1 << "\n";
+                        more_data_seen = true;
+                        AllFileData[ifile][keychem].push_back(test_record);
+                        lowest_recs[ifile] = NA;
+                    }
+                }
+            }
+            
+            // Accumulate all the lowest records that haven't been pushed back
+            // Write out blanks for records that don't exist or have been pushed back
+            
+            //         std::cout << "Accumulating\n";
+            for (ifile=0; ifile < ninfiles; ifile++) {
+                bool first_skipped = false;
+                if (lowest_recs[ifile].nfields()) {
+                    std::vector<std::string>::iterator field = 
+                    lowest_recs[ifile].fields.begin();
+                    std::string last_field;
+                    int column = 0;
+                    for (; field != lowest_recs[ifile].fields.end();field++) {
+                        // data records may have extra terminating comma (microsoft nonstandard csv)
+                        // only fields with names are valid
+                        if (++column > DataColumns[ifile]) {
+                            break;
+                        }
+                        
+                        outline += ",";
+                        outline += *field;
+                        last_field = *field;
+                    }
+                } else {
+                    // output empty fields for this file
+                    int column = 0;
+                    while (++column <= DataColumns[ifile]) {
+                        outline += ",";
+                    }
+                }
+            }
+            outline += LineTerminator;
+            OutputLines.push_back (OutputRecord(outline,lowest_time1));
+        }
     }
-
-//              WRITE OUTPUT DATA
-
-// iterate through each chemical seen
-
-     int records_written = 0;
-     std::cout << "Number of chemicals found: " << Chemicals.size() << "\n";
-     for (std::set<std::string>::iterator 
-          it = Chemicals.begin(); it != Chemicals.end(); ++it)
-     {
-     std::string keychem = *it;
-     bool more_data_seen = true;
-     while (more_data_seen) {
-         std::string outline = keychem;
-         
-// Obtain first and second lowest retention time records from all files
-
-         std::vector<ChemRecord> lowest_recs;
-         float lowest_time1 = 0;
-         float second_lowest_time1 = 0;
-
-         int ifile;
-         more_data_seen = false;
-         for (ifile = 0; ifile < ninfiles; ifile++)
-         {
-         if (AllFileData[ifile].count(keychem) && 
-             AllFileData[ifile][keychem].size()) {
-// sort in place (lowest to back)
-             std::sort (AllFileData[ifile][keychem].begin(),
-                AllFileData[ifile][keychem].end(),
-                ChemRecord::higher);
-
-// pop the lowest
-             ChemRecord lowest  = AllFileData[ifile][keychem].back();
-             AllFileData[ifile][keychem].pop_back();
-             if (lowest_time1 == 0 ||
-             lowest_time1 > lowest.time1) {
-             lowest_time1 = lowest.time1;
-             }
-             lowest_recs.push_back(lowest);
-
-// check the second lowest for time only (don't pop)
-
-             if (AllFileData[ifile][keychem].begin() ==
-             AllFileData[ifile][keychem].end()) {
-             } else {
-             more_data_seen = true;
-             float test_lowest_time1 = 
-                 AllFileData[ifile][keychem].back().time1;
-             if (second_lowest_time1 == 0 ||
-                 second_lowest_time1 > test_lowest_time1) {
-                 second_lowest_time1 = test_lowest_time1;
-             }
-             }
-         } else {
-             lowest_recs.push_back(NA);
-         }
-         }
-
-// Now, for each record in our lowest_recs set
-//    See if it is higher that adiff above the lowest
-//    See if it is closer to the second_lowest than lowest
-//      If either condition applies, push it back
-
-//         std::cout << "aligning\n";
-         for (ifile = 0; ifile < ninfiles; ifile++)
-         {
-         ChemRecord test_record = lowest_recs[ifile];
-         float cutoff;
-         if (afraction) {
-             cutoff = (1 + adiff) * lowest_time1;
-         } else {
-             cutoff = lowest_time1 + adiff;
-         }
-         bool pushback = false;
-         if (test_record.nfields() != 0) {
-             if (test_record.time1 > cutoff) {
-             pushback = true;
-             } else if (test_record.time1 - lowest_time1 > 
-                ABS(second_lowest_time1 - test_record.time1))
-             {
-             pushback = true;
-             }
-             if (pushback) {
-//             std::cout << "doing pushback on record with time " <<
-//                 test_record.time1 << "\n";
-             more_data_seen = true;
-             AllFileData[ifile][keychem].push_back(test_record);
-             lowest_recs[ifile] = NA;
-             }
-         }
-         }
-
-// Accumulate all the lowest records that haven't been pushed back
-// Write out blanks for records that don't exist or have been pushed back
-
-//         std::cout << "Accumulating\n";
-         for (ifile=0; ifile < ninfiles; ifile++)
-         {
-         bool first_skipped = false;
-         if (lowest_recs[ifile].nfields()) {
-             std::vector<std::string>::iterator field = 
-             lowest_recs[ifile].fields.begin();
-             std::string last_field;
-             int column = 0;
-             for (; field != lowest_recs[ifile].fields.end();field++)
-             {
-// data records may have extra terminating comma (microsoft nonstandard csv)
-// only fields with names are valid
-             if (++column > DataColumns[ifile]) {
-                 break;
-             }
-
-             outline += ",";
-             outline += *field;
-             last_field = *field;
-             }
-         } else {
-// output empty fields for this file
-             int column = 0;
-             while (++column <= DataColumns[ifile])
-             {
-             outline += ",";
-             }
-         }
-         }
-         outline += LineTerminator;
-         OutputLines.push_back (OutputRecord(outline,lowest_time1));
-     }
-     }
-
-// Sort all output records by time1
-
-     std::sort (OutputLines.begin(),OutputLines.end(),OutputRecord::lower);
-
-// Write all output records
-
-     std::vector<OutputRecord>::iterator it;
-     for (it = OutputLines.begin(); it != OutputLines.end(); it++)
-     {
-     outfile << it->line;
-     records_written++;
-     }
-
-     std::cout << "\n" << records_written 
-           << " records written to aligncsv.csv\n\n";
+    
+    // Sort all output records by time1
+    
+    std::sort (OutputLines.begin(),OutputLines.end(),OutputRecord::lower);
+    
+    // Write all output records
+    
+    std::vector<OutputRecord>::iterator it;
+    for (it = OutputLines.begin(); it != OutputLines.end(); it++) {
+        outfile << it->line;
+        records_written++;
+    }
+    
+    std::cout << "\n" << records_written 
+    << " records written to aligncsv.csv\n\n";
     return 0;
 }
 
