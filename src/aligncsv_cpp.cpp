@@ -65,7 +65,7 @@
 // STDPRE defines the prefix needed to get C++11 functionality
 // TR1 is needed if compiler is pre C++11 (e.g. gcc 4.4.7)
 // Comment this out for C++11 compliant compilers
-// #define TR1 1
+//#define TR1 1
 
 #ifdef TR1
 #define STDPRE std::tr1
@@ -87,8 +87,9 @@
 #include <set>
 #include <cctype>
 #include <algorithm>
+
 #ifdef TR1
-// tr1 update required for unordered_map
+// tr1 update required for unordered_map on pre-C++11 compilers
 #include <tr1/unordered_map> // removed to moke C++11 compliant
 #else
 #include <unordered_map>
@@ -96,7 +97,7 @@
 
 using std::ofstream;
 
-std::unordered_map<std::string, std::string>Table;  // all field data
+STDPRE::unordered_map<std::string, std::string>Table;  // all field data
 std::set<std::string>Chemicals; // just the chemical names
 std::vector<std::string> Header;
 std::vector<std::string> Header1;
