@@ -3,14 +3,16 @@
 // Filename: aligncsv.cc
 // Purpose: align multiple csv files produced by Chromatof
 // Author: Charles Peterson, Texas Biomed, August 2017
-// Usage: aligncsv [-1] [-d <diff>] [<filename>]+
+// Usage: aligncsv [-1] [-d <diff>] [-o <outfile>] [-m] [<filename>]+
 //        -1 means force one line header on output (not required if
 //           there is only one header anyway)
 //        -d <diff> is floating point fraction < 1 (proportion) or integer
 //           (arithmetic difference) by which 1st dimension time can vary in
 //           the same record (defaults to 0.01 meaning 1%), only first time
 //           in any record is checked
+//        -o <outfile> write to this file instead of aligncsv.csv
 //        -m Use "microsoft" excel formatting with trailing comma
+//        -r Restrict output to chemical and time found in all files
 //
 // Output: aligncsv.csv file is written to working directory.
 //
@@ -111,8 +113,8 @@ public:
     std::vector<std::string> fields;  // data fields following chemical
     float time1;
     float time2;
-    static bool higher (ChemRecord c1, ChemRecord c2)
-    {return c1.time1 > c2.time1;}
+    static bool higher (ChemRecord c1, ChemRecord c2) 
+	{return c1.time1 > c2.time1;}
     int nfields () {return fields.size();}
 };
 
@@ -128,11 +130,11 @@ std::vector<STDPRE::unordered_map<std::string,std::vector<ChemRecord> > >AllFile
 class OutputRecord {
 public:
     OutputRecord (std::string inputline, float intime1)
-    {line=inputline;time1=intime1;}
+	{line=inputline;time1=intime1;}
     std::string line;
     float time1;
     static bool lower (OutputRecord r1, OutputRecord r2)
-    {return r1.time1 < r2.time1;}
+	{return r1.time1 < r2.time1;}
 };
 
 std::vector<OutputRecord> OutputLines;
@@ -147,52 +149,82 @@ int main (int argc, char** argv) {
     bool afraction = true;
     std::ifstream infile[MAXFILES];  // std::vector not possible for ifstream
     int ninfiles = 0;
-    std::ofstream outfile;
-    outfile.open("aligncsv.csv");
-    if (outfile.fail()) {
-        std::cerr << "Unable to open output file\n";
-        return -10;
-    }
-    
-    // parse arguments and open files
-    
-    if (argc < 2) {
-        std::cout << "Usage: aligncsv [-1] [-d <diff>] [<filename>]+\n";
-        std::cout << "-1 means force two headers to one\n";
-        std::cout << "-d <diff> sets maximum alignment difference, default is .01 for 1%\n";
-        std::cout << "   >1 will set integer difference, 0 means must be exactly same\n";
-        return 0;
-    }
-    
-    int iarg = 1;
+    std::string outname = "aligncsv.csv";
     int single_header = 0;
-    if (!strcmp(argv[iarg],"-1")) {
-        //  std::cout << "single header override\n";
-        single_header = 1;
-        iarg++;
+    bool restricted = false;
+
+// parse arguments and open files
+
+    if (argc < 2) {
+	std::cout << "Usage: aligncsv [-1] [-d <diff>] [<filename>]+\n";
+	std::cout << "-1 means force two headers to one\n";
+	std::cout << "-d <diff> sets maximum alignment difference, default is .01 for 1%\n";
+	std::cout << "   >1 will set integer difference, 0 means must be exactly same\n";
+	std::cout << "-o <outfile> means output to this file (default is aligncsv.csv)\n";
+	std::cout << "-m meaus use trailing comma format like Microsoft does\n";
+	std::cout << "-r means restrict to chemical/times found in all files\n";
+	return 0;
     }
-    if (!strcmp(argv[iarg],"-d")) {
-        iarg++;
-        if (argc < 3) {
-            std::cerr << "-d requires <diff> specification\n";
-            return -1;
-        }
-        char* ppend;
-        adiff = strtof (argv[iarg],&ppend);
-        if (adiff < 0 || *ppend != 0) {
-            std::cerr << "<diff> specification must be >= 0\n";
-            return -1;
-        }
-        if (adiff >= 1) {
-            afraction = false;
-        }
-        iarg++;
-    }
-    if (!strcmp(argv[iarg],"-m")) {
-        LineTerminator = MICROSOFT_TERMINATOR;
-        iarg++;
-    }
+
+    int iarg = 1;
+    int starg = 0;
+    while (iarg > starg)
+    {
+	starg = iarg;
     
+	if (!strcmp(argv[iarg],"-1")) {
+	    single_header = 1;
+	    iarg++;
+	}
+	if (!strcmp(argv[iarg],"-d")) {
+	    iarg++;
+	    if (argc < 3) {
+		std::cerr << "-d requires <diff> specification\n";
+		return -1;
+	    }
+	    char* ppend;
+	    adiff = strtof (argv[iarg],&ppend);
+	    if (adiff < 0 || *ppend != 0) {
+		std::cerr << "<diff> specification must be >= 0\n";
+		return -1;
+	    }
+	    if (adiff >= 1) {
+		afraction = false;
+	    }
+	    iarg++;
+	}
+	if (!strcmp(argv[iarg],"-o")) {
+	    iarg++;
+	    if (argc < 3) {
+		std::cerr << "-o requires <outfilename> specification\n";
+		return -1;
+	    }
+	    if (FILE *testfile = fopen (argv[iarg],"r")) {
+		fclose (testfile);
+		std::cerr << "file named " << argv[iarg] << 
+		    " already exists and must be deleted first\n";
+		return -1;
+	    }
+	    outname = argv[iarg];
+	    iarg++;
+	}
+	if (!strcmp(argv[iarg],"-m")) {
+	    LineTerminator = MICROSOFT_TERMINATOR;
+	    iarg++;
+	}
+	if (!strcmp(argv[iarg],"-r")) {
+	    restricted = true;
+	    iarg++;
+	}
+    }
+
+    std::ofstream outfile;
+    outfile.open(outname.c_str());
+    if (outfile.fail()) {
+	std::cerr << "Unable to open output file\n";
+	return -10;
+    }
+
     int first_file_index = iarg;
     
     for (; iarg < argc; iarg++) {
@@ -224,7 +256,7 @@ int main (int argc, char** argv) {
     int count_empties;
     int record_size;
     bool header2_required;
-    
+
     std::vector<std::vector<std::string> > Lines_in_file;
     for (int ifile = 0; ifile < ninfiles; ifile++) {
         FileData.clear();
