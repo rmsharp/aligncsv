@@ -114,7 +114,7 @@ public:
     float time1;
     float time2;
     static bool higher (ChemRecord c1, ChemRecord c2) 
-	{return c1.time1 > c2.time1;}
+    {return c1.time1 > c2.time1;}
     int nfields () {return fields.size();}
 };
 
@@ -130,11 +130,11 @@ std::vector<STDPRE::unordered_map<std::string,std::vector<ChemRecord> > >AllFile
 class OutputRecord {
 public:
     OutputRecord (std::string inputline, float intime1)
-	{line=inputline;time1=intime1;}
+    {line=inputline;time1=intime1;}
     std::string line;
     float time1;
     static bool lower (OutputRecord r1, OutputRecord r2)
-	{return r1.time1 < r2.time1;}
+    {return r1.time1 < r2.time1;}
 };
 
 std::vector<OutputRecord> OutputLines;
@@ -156,75 +156,80 @@ int main (int argc, char** argv) {
 // parse arguments and open files
 
     if (argc < 2) {
-	std::cout << "Usage: aligncsv [-1] [-d <diff>] [<filename>]+\n";
-	std::cout << "-1 means force two headers to one\n";
-	std::cout << "-d <diff> sets maximum alignment difference, default is .01 for 1%\n";
-	std::cout << "   >1 will set integer difference, 0 means must be exactly same\n";
-	std::cout << "-o <outfile> means output to this file (default is aligncsv.csv)\n";
-	std::cout << "-m meaus use trailing comma format like Microsoft does\n";
-	std::cout << "-r means restrict to chemical/times found in all files\n";
-	return 0;
+    std::cout << "Usage: aligncsv [-1] [-d <diff>] [<filename>]+\n";
+    std::cout << "-1 means force two headers to one\n";
+    std::cout << "-d <diff> sets maximum alignment difference, default is .01 for 1%\n";
+    std::cout << "   >1 will set integer difference, 0 means must be exactly same\n";
+    std::cout << "-o <outfile> means output to this file (default is aligncsv.csv)\n";
+    std::cout << "-m meaus use trailing comma format like Microsoft does\n";
+    std::cout << "-r means restrict to chemical/times found in all files\n";
+    return 0;
     }
 
     int iarg = 1;
     int starg = 0;
     while (iarg > starg)
     {
-	starg = iarg;
+    starg = iarg;
     
-	if (!strcmp(argv[iarg],"-1")) {
-	    single_header = 1;
-	    iarg++;
-	}
-	if (!strcmp(argv[iarg],"-d")) {
-	    iarg++;
-	    if (argc < 3) {
-		std::cerr << "-d requires <diff> specification\n";
-		return -1;
-	    }
-	    char* ppend;
-	    adiff = strtof (argv[iarg],&ppend);
-	    if (adiff < 0 || *ppend != 0) {
-		std::cerr << "<diff> specification must be >= 0\n";
-		return -1;
-	    }
-	    if (adiff >= 1) {
-		afraction = false;
-	    }
-	    iarg++;
-	}
-	if (!strcmp(argv[iarg],"-o")) {
-	    iarg++;
-	    if (argc < 3) {
-		std::cerr << "-o requires <outfilename> specification\n";
-		return -1;
-	    }
-	    if (FILE *testfile = fopen (argv[iarg],"r")) {
-		fclose (testfile);
-		std::cerr << "file named " << argv[iarg] << 
-		    " already exists and must be deleted first\n";
-		return -1;
-	    }
-	    outname = argv[iarg];
-	    iarg++;
-	}
-	if (!strcmp(argv[iarg],"-m")) {
-	    LineTerminator = MICROSOFT_TERMINATOR;
-	    iarg++;
-	}
-	if (!strcmp(argv[iarg],"-r")) {
-	    restricted = true;
-	    iarg++;
-	}
+    if (!strcmp(argv[iarg],"-1")) {
+        single_header = 1;
+        iarg++;
+    }
+    if (!strcmp(argv[iarg],"-d")) {
+        iarg++;
+        if (argc < 3) {
+        std::cerr << "-d requires <diff> specification\n";
+        return -1;
+        }
+        char* ppend;
+        adiff = strtof (argv[iarg],&ppend);
+        if (adiff < 0 || *ppend != 0) {
+        std::cerr << "<diff> specification must be >= 0\n";
+        return -1;
+        }
+        if (adiff >= 1) {
+        afraction = false;
+        }
+        iarg++;
+    }
+    if (!strcmp(argv[iarg],"-o")) {
+        iarg++;
+        if (argc < 3) {
+        std::cerr << "-o requires <outfilename> specification\n";
+        return -1;
+        }
+        if (FILE *testfile = fopen (argv[iarg],"r")) {
+        fclose (testfile);
+        std::cerr << "file named " << argv[iarg] << 
+            " already exists and must be deleted first\n";
+        return -1;
+        }
+        outname = argv[iarg];
+        iarg++;
+    }
+    if (!strcmp(argv[iarg],"-m")) {
+        LineTerminator = MICROSOFT_TERMINATOR;
+        iarg++;
+    }
+    if (!strcmp(argv[iarg],"-r")) {
+        restricted = true;
+        iarg++;
+    }
     }
 
     std::ofstream outfile;
     outfile.open(outname.c_str());
     if (outfile.fail()) {
-	std::cerr << "Unable to open output file\n";
-	return -10;
+      std::cerr << "Unable to open output file\n";
+      return -10;
     }
-
+    // This section collects all of the filenames into a charcter string 
+    // Filenames and ensures they can be opened
+    // If a file cannot be found an error message beginning with "No such file:" 
+    // is generated. 
+    // If a file cannot be opend an error message of "File ", file_name, 
+    // " was not opened\n" is generated.
     int first_file_index = iarg;
     
     for (; iarg < argc; iarg++) {
