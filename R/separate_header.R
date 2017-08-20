@@ -8,7 +8,7 @@
 #' read.csv(). 
 #' Each line of the original file is tokenized into fields defined by commas 
 #' separated values.
-#' @param removed_trailers logical vector of length one indication whether or
+#' @param remove_trailers logical vector of length one indication whether or
 #' not to remove Microsoft-excel-style trailing commas after the last valid 
 #' field. 
 #' This is set by to TRUE by default unless the -m option is specified.
