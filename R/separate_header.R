@@ -4,9 +4,17 @@
 #' trailing empty tokens, and packages the header lines and the data lines
 #' into a list with two parts: header and data.
 #' 
+#' @param lines dataframe of character vectors where the tokens were created by 
+#' read.csv(). 
+#' Each line of the original file is tokenized into fields defined by commas 
+#' separated values.
+#' @param removed_trailers logical vector of length one indication whether or
+#' not to remove Microsoft-excel-style trailing commas after the last valid 
+#' field. 
+#' This is set by to TRUE by default unless the -m option is specified.
 #' @import stringi
 #' @export
-separate_header <- function(lines) {
+separate_header <- function(lines, remove_trailers = TRUE) {
   ptr <- 1
   count_empties <- length(lines[ptr, ][!is.na(lines[ptr, ]) & 
                                          lines[ptr, ] == ""])
@@ -16,7 +24,7 @@ separate_header <- function(lines) {
     ptr <- ptr + 1
     header[[ptr]] <- as.character(lines[ptr, ])
   }
-  if (is.na(lines[ptr, ][length(lines[ptr, ])])) {
+  if (is.na(lines[ptr, ][length(lines[ptr, ])]) & remove_trailers) {
     for (i in 1:ptr) {
       header[[i]] <- header[[i]][1:(length(header[[i]]) - 1)]
     }
