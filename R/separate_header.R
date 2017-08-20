@@ -1,37 +1,38 @@
-lines <- readLines(con = "../data/lowest3.csv", skipNul = TRUE)
-tokenize_lines <- function(lines) {
-  lines <- lines[!lines == ""]
-  tokenized_lines <- vector(mode = "list", length = length(lines))
-  for (i in seq_along(lines)) {
-    tokenized_lines[[i]] <- 
-      stri_trim_both(stri_split_fixed(lines[i], ",")[[1]])
-  }
-  tokenized_lines
-}
+#' Separate header lines from data lines.
+#' 
+#' Takes tokenized lines, separates header lines from data lines, trims off
+#' trailing empty tokens, and packages the header lines and the data lines
+#' into a list with two parts: header and data.
+#' 
 #' @import stringi
 #' @export
 separate_header <- function(lines) {
   ptr <- 1
-  count_empties <- length(lines[[ptr]][lines[[ptr]] == ""])
+  count_empties <- length(lines[ptr, ][!is.na(lines[ptr, ]) & 
+                                         lines[ptr, ] == ""])
   header <- list(header1 = character(0), header2 = character(0))
-  header[[ptr]] <- lines[[ptr]]
+  header[[ptr]] <- as.character(lines[ptr, ])
   if (count_empties > 0) { # Need another line for the header
     ptr <- ptr + 1
-    header[[ptr]] <- lines[[ptr]]
+    header[[ptr]] <- as.character(lines[ptr, ])
   }
-  if (lines[[ptr]][length(lines[[ptr]])] == "") {
+  if (is.na(lines[ptr, ][length(lines[ptr, ])])) {
     for (i in 1:ptr) {
       header[[i]] <- header[[i]][1:(length(header[[i]]) - 1)]
     }
-    for (i in seq_along(lines)) {
-      lines[[i]] <- lines[[i]][1:(length(lines[[i]]) - 1)]
-    }
+    lines <- lines[ , 1:(length(lines[i, ]) - 1)]
   }
   header <- header[1:ptr]
   ptr <- ptr + 1
-  if (length(lines) >= ptr) {
-    list(header = header, lines = lines[ptr:length(lines)])
+  .df <- data.frame()
+  connect <- ifelse(header$header1 == "", "", "_")
+  header1_2 <- stri_c(header$header1, connect, header$header2)
+  
+  if (nrow(lines) >= ptr) {
+    .df <- lines[ptr:nrow(lines), ]
+    names(.df) <- header1_2
+    list(header = header, data = .df)
   } else {
-    list(header = header, lines = character(0))
+    list(header = header, data = .df)
   }
 } 
