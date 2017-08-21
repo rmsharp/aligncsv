@@ -45,7 +45,8 @@
 //    unless the -m option is specified.
 //
 // When run on linux, this program will terminate lines as Unix does, with \n.
-// If this program is compiled on Windows, it should terminate lines like Windows.
+// If this program is compiled on Windows, it should terminate lines like 
+// Windows.
 //
 // When the file is copied to the other platform, generally the system will do
 //   the required conversion.
@@ -157,12 +158,12 @@ int main (int argc, char** argv) {
 
     if (argc < 2) {
     std::cout << "Usage: aligncsv [-1] [-d <diff>] [<filename>]+\n";
-    std::cout << "-1 means force two headers to one\n";
+    std::cout << "-1 force two headers to one\n";
     std::cout << "-d <diff> sets maximum alignment difference, default is .01 for 1%\n";
     std::cout << "   >1 will set integer difference, 0 means must be exactly same\n";
-    std::cout << "-o <outfile> means output to this file (default is aligncsv.csv)\n";
-    std::cout << "-m meaus use trailing comma format like Microsoft does\n";
-    std::cout << "-r means restrict to chemical/times found in all files\n";
+    std::cout << "-o <outfile> output to this file (default is aligncsv.csv)\n";
+    std::cout << "-m use trailing comma format like Microsoft does\n";
+    std::cout << "-r restrict to chemical/times found in all files\n";
     return 0;
     }
 
